@@ -35,11 +35,9 @@ const projects = [
   },
 ];
 
-// We define the shape of our project data so TypeScript doesn't yell at us
 type Project = typeof projects[0];
 
 export default function Portfolio() {
-  // This state Remembers which project the user clicked on
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   return (
@@ -67,7 +65,6 @@ export default function Portfolio() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
-              // When clicked, we tell the state to open this specific project
               onClick={() => setSelectedProject(project)}
               className="group cursor-pointer flex flex-col gap-4"
             >
@@ -96,16 +93,14 @@ export default function Portfolio() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 md:p-12"
           >
-            {/* The actual expanded card */}
             <motion.div 
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-[#0a0a0a] border border-white/10 w-full max-w-6xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl"
+              className="bg-[#0a0a0a] border border-white/10 w-full max-w-6xl rounded-2xl overflow-y-auto max-h-[90vh] flex flex-col md:flex-row shadow-2xl"
             >
               
-              {/* Left Side: Massive Image */}
               <div className="w-full md:w-3/5 aspect-video md:aspect-auto md:h-[70vh]">
                 <img 
                   src={selectedProject.img} 
@@ -114,10 +109,8 @@ export default function Portfolio() {
                 />
               </div>
 
-              {/* Right Side: Project Details & Close Button */}
               <div className="w-full md:w-2/5 p-8 md:p-12 flex flex-col justify-between relative">
                 
-                {/* Close Button ("X") */}
                 <button 
                   onClick={() => setSelectedProject(null)}
                   className="absolute top-6 right-6 text-gray-500 hover:text-white text-3xl transition-colors"

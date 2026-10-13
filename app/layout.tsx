@@ -1,23 +1,29 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
-import CustomCursor from "@/components/CustomCursor"; // 1. Added this
+import CustomCursor from "@/components/CustomCursor";
+import Navigation from "@/components/Navigation"; 
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Agency Experience Center",
-  description: "Digital Marketing, Video Production & Dev",
+  description: "Next-gen digital agency showcasing immersive experiences.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className="antialiased bg-[#050505] text-white">
+      <body className={`${inter.className} bg-[#050505] text-[#FAFAFA] antialiased selection:bg-white selection:text-black`}>
+        {/* We changed SmoothScroll to wrap around our page content! */}
         <SmoothScroll>
-          <CustomCursor /> {/* 2. Added this */}
+          <CustomCursor />
+          <Navigation /> 
           {children}
         </SmoothScroll>
       </body>

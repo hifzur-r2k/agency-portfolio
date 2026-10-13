@@ -1,13 +1,19 @@
 @import "tailwindcss";
-@source "../components";
 
-/* Force the system cursor to hide EVERYWHERE */
-* {
-  cursor: none !important;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: #050505;
+    color: #FAFAFA;
+    overflow-x: hidden;
+  }
 }
 
-body {
-  background-color: #050505;
-  color: #FAFAFA;
-  overflow-x: hidden;
+/* Only hide cursor on desktop devices with a fine pointer */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
 }

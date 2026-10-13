@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Services from "../components/Services"; 
 import Marquee from "../components/Marquee"; 
 import Footer from "../components/Footer"; 
-import Hero3D from "../components/Hero3D"; // 1. Added the 3D Engine here!
+import Hero3D from "../components/Hero3D"; 
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,11 +51,7 @@ export default function Home() {
       
       {/* SECTION 1: THE ANIMATED HERO */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center p-8 text-center border-b border-white/10 overflow-hidden">
-        
-        {/* 2. Inserted the 3D Background exactly here */}
         <Hero3D />
-
-        {/* 3. Added 'relative z-10' so the text stays clearly on top of the 3D */}
         <motion.div variants={container} initial="hidden" animate="show" className="relative z-10 flex flex-col items-center pointer-events-none">
           <div className="overflow-hidden mb-2">
             <motion.h1 variants={item} className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
