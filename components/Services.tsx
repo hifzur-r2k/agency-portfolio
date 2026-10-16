@@ -15,7 +15,10 @@ export default function Services() {
   const [hoveredIndex, setHoveredIndex] = useState<number>(0);
 
   return (
-    <section className="min-h-screen w-full bg-[#050505] text-[#FAFAFA] py-24 px-8 flex flex-col justify-center border-t border-white/10">
+    <section 
+      id="services" 
+      className="min-h-screen w-full bg-[#050505] text-[#FAFAFA] py-24 px-8 flex flex-col justify-center border-t border-white/10"
+    >
       <div className="max-w-7xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         
         <div className="flex flex-col gap-6 relative z-10 order-2 md:order-1">

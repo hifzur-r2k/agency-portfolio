@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,12 +8,91 @@ import { usePathname } from "next/navigation";
 export default function Navigation() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeHash, setActiveHash] = useState("");
+  
+  // Prevents the scroll listener from overriding the pill animation while click-scrolling
+  const isClickScrolling = useRef(false);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const links = [
     { name: "Home", path: "/" },
     { name: "Portfolio", path: "/portfolio" },
     { name: "Services", path: "/#services" },
   ];
+
+  const lockScrollSpy = () => {
+    isClickScrolling.current = true;
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      isClickScrolling.current = false;
+    }, 900);
+  };
+
+  // Detect hash on route changes & track scroll position on the homepage
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveHash("");
+      return;
+    }
+
+    // If arriving on "/" with #services in the URL (e.g., from the Portfolio page)
+    if (window.location.hash === "#services") {
+      setActiveHash("#services");
+      lockScrollSpy();
+      setTimeout(() => {
+        document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+
+    const handleScroll = () => {
+      if (isClickScrolling.current) return;
+
+      const servicesSection = document.getElementById("services");
+      if (servicesSection) {
+        const rect = servicesSection.getBoundingClientRect();
+        // Switch pill to Services when the section reaches the middle of the screen
+        if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= 100) {
+          setActiveHash("#services");
+        } else {
+          setActiveHash("");
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname]);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    setIsOpen(false);
+
+    if (path === "/#services") {
+      setActiveHash("#services");
+      lockScrollSpy();
+
+      if (pathname === "/") {
+        e.preventDefault();
+        document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", "/#services");
+      }
+    } else if (path === "/") {
+      setActiveHash("");
+      lockScrollSpy();
+
+      if (pathname === "/") {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.pushState(null, "", "/");
+      }
+    } else {
+      setActiveHash("");
+    }
+  };
+
+  // Determine which nav item should have the active pill
+  const currentActivePath = pathname === "/" && activeHash === "#services" ? "/#services" : pathname;
 
   return (
     <>
@@ -27,7 +106,11 @@ export default function Navigation() {
         >
           
           {/* THE 2D/3D WIREFRAME LOGO */}
-          <Link href="/" className="group flex items-center gap-3 pl-2" onClick={() => setIsOpen(false)}>
+          <Link 
+            href="/" 
+            className="group flex items-center gap-3 pl-2" 
+            onClick={(e) => handleNavClick(e, "/")}
+          >
             <div className="relative w-8 h-8 md:w-10 md:h-10 text-white flex items-center justify-center">
               {/* Detailed Geometric SVG mimicking a 3D Sphere/Gyroscope */}
               <svg 
@@ -56,11 +139,12 @@ export default function Navigation() {
           {/* DESKTOP LINKS (With sliding pill indicator) */}
           <div className="hidden md:flex items-center gap-1">
             {links.map((link) => {
-              const isActive = pathname === link.path;
+              const isActive = currentActivePath === link.path;
               return (
                 <Link 
                   key={link.name} 
-                  href={link.path} 
+                  href={link.path}
+                  onClick={(e) => handleNavClick(e, link.path)}
                   className={`relative px-5 py-2 text-xs font-bold uppercase tracking-[0.2em] transition-colors z-10 ${isActive ? "text-white" : "text-gray-400 hover:text-white"}`}
                 >
                   {isActive && (
@@ -106,22 +190,25 @@ export default function Navigation() {
             className="fixed inset-0 z-[999998] bg-[#050505]/80 flex flex-col items-center justify-center md:hidden"
           >
             <div className="flex flex-col items-center gap-8 text-3xl font-black uppercase tracking-widest">
-              {links.map((link, i) => (
-                <motion.div 
-                  key={link.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * i, type: "spring" }}
-                >
-                  <Link 
-                    href={link.path} 
-                    onClick={() => setIsOpen(false)} 
-                    className={`transition-colors ${pathname === link.path ? "text-white" : "text-gray-500 hover:text-white"}`}
+              {links.map((link, i) => {
+                const isActive = currentActivePath === link.path;
+                return (
+                  <motion.div 
+                    key={link.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * i, type: "spring" }}
                   >
-                    {link.name}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link 
+                      href={link.path} 
+                      onClick={(e) => handleNavClick(e, link.path)} 
+                      className={`transition-colors ${isActive ? "text-white" : "text-gray-500 hover:text-white"}`}
+                    >
+                      {link.name}
+                    </Link>
+                  </motion.div>
+                );
+              })}
               <motion.a 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
