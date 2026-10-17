@@ -53,7 +53,7 @@ export default function Portfolio() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-5xl md:text-8xl font-black uppercase tracking-tighter mb-16 leading-[0.9]"
+          className="text-4xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter mb-16 leading-[0.9]"
         >
           Selected <br/><span className="text-gray-500">Works</span>
         </motion.h1>

@@ -5,12 +5,12 @@ import Link from "next/link"; // We need this to travel between pages!
 
 export default function Footer() {
   return (
-    <section className="bg-[#050505] text-[#FAFAFA] py-24 px-8 border-t border-white/10 z-10 relative">
+    <section className="w-full bg-[#050505] text-[#FAFAFA] py-24 px-8 border-t border-white/10 z-10 relative">
       <div className="max-w-7xl mx-auto flex flex-col gap-12">
         
         {/* TOP ROW: Huge Call to Action */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-          <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter max-w-2xl leading-[0.9]">
+          <h2 className="text-4xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter max-w-2xl leading-[0.9]">
             Let's Build <br/>
             <span className="text-gray-500">Something</span>
           </h2>

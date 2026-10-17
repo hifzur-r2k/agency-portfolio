@@ -3,11 +3,13 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
   body {
     background-color: #050505;
     color: #FAFAFA;
     overflow-x: hidden;
+    max-width: 100%;
   }
 }
 

@@ -2,7 +2,7 @@
 
 export default function Marquee() {
   return (
-    <section className="py-24 bg-[#FAFAFA] text-[#050505] overflow-hidden flex flex-col gap-4 relative">
+    <section className="w-full py-24 bg-[#FAFAFA] text-[#050505] overflow-hidden flex flex-col gap-4 relative">
       
       {/* This invisible style block gives us the smooth infinite scrolling math */}
       <style>{`
@@ -21,16 +21,16 @@ export default function Marquee() {
       {/* ROW 1: Scrolling Left (Solid Text) */}
       <div className="flex w-[200%] marquee-left">
         <div className="flex whitespace-nowrap">
-          <span className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
+          <span className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
             INNOVATE • CREATE • ELEVATE • 
           </span>
-          <span className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
+          <span className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
             INNOVATE • CREATE • ELEVATE • 
           </span>
-          <span className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
+          <span className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
             INNOVATE • CREATE • ELEVATE • 
           </span>
-          <span className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
+          <span className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8">
             INNOVATE • CREATE • ELEVATE • 
           </span>
         </div>
@@ -40,25 +40,25 @@ export default function Marquee() {
       <div className="flex w-[200%] marquee-right">
         <div className="flex whitespace-nowrap">
           <span 
-            className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
+            className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
             style={{ WebkitTextStroke: '2px #050505' }}
           >
             ASTONISH • INSPIRE • CONVERT • 
           </span>
           <span 
-            className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
+            className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
             style={{ WebkitTextStroke: '2px #050505' }}
           >
             ASTONISH • INSPIRE • CONVERT • 
           </span>
           <span 
-            className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
+            className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
             style={{ WebkitTextStroke: '2px #050505' }}
           >
             ASTONISH • INSPIRE • CONVERT • 
           </span>
           <span 
-            className="text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
+            className="text-4xl sm:text-6xl md:text-9xl font-black uppercase tracking-tighter pr-8 text-transparent"
             style={{ WebkitTextStroke: '2px #050505' }}
           >
             ASTONISH • INSPIRE • CONVERT • 

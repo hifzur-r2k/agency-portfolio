@@ -54,12 +54,12 @@ export default function Home() {
         <Hero3D />
         <motion.div variants={container} initial="hidden" animate="show" className="relative z-10 flex flex-col items-center pointer-events-none">
           <div className="overflow-hidden mb-2">
-            <motion.h1 variants={item} className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
+            <motion.h1 variants={item} className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
               We Engineer
             </motion.h1>
           </div>
           <div className="overflow-hidden mb-8">
-            <motion.h1 variants={item} className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9] text-gray-500">
+            <motion.h1 variants={item} className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9] text-gray-500">
               Experiences
             </motion.h1>
           </div>
