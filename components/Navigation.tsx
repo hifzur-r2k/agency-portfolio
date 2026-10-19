@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,12 +8,7 @@ import { usePathname } from "next/navigation";
 export default function Navigation() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [activeHash, setActiveHash] = useState("");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   
   // Prevents the scroll listener from overriding the pill animation while click-scrolling
   const isClickScrolling = useRef(false);
@@ -103,12 +97,12 @@ export default function Navigation() {
   return (
     <>
       {/* THE FLOATING GLASS PILL */}
-      <header className="relative z-[999999] w-full flex justify-center px-4 pt-6">
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-[999999] w-[90%] md:w-auto">
         <motion.nav 
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
-          className="flex items-center justify-between md:justify-center gap-8 px-3 py-3 rounded-full bg-[#0a0a0a]/50 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full max-w-[90vw] md:w-auto"
+          className="flex items-center justify-between md:justify-center gap-8 px-3 py-3 rounded-full bg-[#0a0a0a]/50 backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
         >
           
           {/* THE 2D/3D WIREFRAME LOGO */}
@@ -187,48 +181,47 @@ export default function Navigation() {
       </header>
 
       {/* MOBILE FULL-SCREEN MENU (Glassmorphic) */}
-      {mounted && createPortal(
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              style={{
-                backgroundColor: "rgba(5, 5, 5, 0.5)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-              }}
-              className="fixed inset-x-0 top-0 bottom-0 z-[999998] flex flex-col items-center justify-center md:hidden"
-            >
-              <div className="flex flex-col items-center gap-8 text-3xl font-black uppercase tracking-widest">
-                {links.map((link) => {
-                  const isActive = currentActivePath === link.path;
-                  return (
-                    <div key={link.name}>
-                      <Link 
-                        href={link.path} 
-                        onClick={(e) => handleNavClick(e, link.path)} 
-                        className={`transition-colors ${isActive ? "text-white" : "text-gray-500 hover:text-white"}`}
-                      >
-                        {link.name}
-                      </Link>
-                    </div>
-                  );
-                })}
-                <a 
-                  href="mailto:hello@agency.com"
-                  className="mt-4 px-8 py-4 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-transform"
-                >
-                  START PROJECT
-                </a>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            className="fixed inset-0 z-[999998] bg-[#050505]/80 flex flex-col items-center justify-center md:hidden"
+          >
+            <div className="flex flex-col items-center gap-8 text-3xl font-black uppercase tracking-widest">
+              {links.map((link, i) => {
+                const isActive = currentActivePath === link.path;
+                return (
+                  <motion.div 
+                    key={link.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * i, type: "spring" }}
+                  >
+                    <Link 
+                      href={link.path} 
+                      onClick={(e) => handleNavClick(e, link.path)} 
+                      className={`transition-colors ${isActive ? "text-white" : "text-gray-500 hover:text-white"}`}
+                    >
+                      {link.name}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+              <motion.a 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, type: "spring" }}
+                href="mailto:hello@agency.com"
+                className="mt-4 px-8 py-4 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-transform"
+              >
+                START PROJECT
+              </motion.a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

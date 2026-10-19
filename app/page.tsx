@@ -9,6 +9,7 @@ import Services from "../components/Services";
 import Marquee from "../components/Marquee"; 
 import Footer from "../components/Footer"; 
 import Hero3D from "../components/Hero3D"; 
+import Typewriter from "../components/Typewriter"; // Imported the new component
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,6 +50,9 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center">
       
+      {/* THE NEW TYPEWRITER COMPONENT */}
+      <Typewriter />
+
       {/* SECTION 1: THE ANIMATED HERO */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center p-8 text-center border-b border-white/10 overflow-hidden">
         <Hero3D />
