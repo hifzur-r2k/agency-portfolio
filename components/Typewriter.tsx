@@ -1,88 +1,56 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-const words = [
-  "#Digital Marketing",
-  "#Video Production",
-  "#Graphic Design",
-  "#Web & App Dev",
+const services = [
+  "Digital Marketing",
+  "Video Production",
+  "Graphic Design",
+  "Web & App Development",
 ];
 
 export default function Typewriter() {
   const [index, setIndex] = useState(0);
-  const [subIndex, setSubIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [blink, setBlink] = useState(true);
 
-  // --- BARREL ROLL SCROLL ANIMATIONS ---
-  const { scrollY } = useScroll();
-  
-  // 1. Fades out
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
-  
-  // 2. Floats upwards 100 pixels
-  const y = useTransform(scrollY, [0, 300], [0, -100]);
-  
-  // 3. THE ROLL: Spins 180 degrees counter-clockwise
-  const rotate = useTransform(scrollY, [0, 300], [0, -180]);
-  
-  // 4. Shrinks down to 30% of its size as it spins away
-  const scale = useTransform(scrollY, [0, 300], [1, 0.3]);
-
-  // Blinking cursor effect
+  // Cycles through the words every 3 seconds
   useEffect(() => {
-    const cursorTimeout = setTimeout(() => {
-      setBlink((prev) => !prev);
-    }, 500);
-    return () => clearTimeout(cursorTimeout);
-  }, [blink]);
-
-  // Typing and erasing logic
-  useEffect(() => {
-    if (index === words.length) {
-      setIndex(0);
-      return;
-    }
-
-    if (subIndex === words[index].length + 1 && !isDeleting) {
-      const pauseTimeout = setTimeout(() => setIsDeleting(true), 2000); 
-      return () => clearTimeout(pauseTimeout);
-    }
-
-    if (subIndex === 0 && isDeleting) {
-      setIsDeleting(false);
-      setIndex((prev) => (prev + 1) % words.length);
-      return;
-    }
-
-    const typingTimeout = setTimeout(() => {
-      setSubIndex((prev) => prev + (isDeleting ? -1 : 1));
-    }, isDeleting ? 50 : 100); 
-
-    return () => clearTimeout(typingTimeout);
-  }, [subIndex, index, isDeleting]);
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % services.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <motion.div
-      style={{
-        opacity,
-        y,
-        rotate, // Applies the spinning effect
-        scale,
-        transformOrigin: "center center", // Ensures it spins perfectly from its own center
-      }}
-      className="absolute top-10 left-10 z-50 text-gray-400 font-mono font-bold text-lg tracking-wide pointer-events-none"
+    <div 
+      // Positioned cleanly in the corner, pushed down slightly on mobile
+      className="absolute top-24 left-6 md:top-12 md:left-12 z-50 flex items-center gap-4 pointer-events-none"
     >
-      {words[index].substring(0, subIndex)}
-      <span
-        className={`${
-          blink ? "opacity-100" : "opacity-0"
-        } transition-opacity duration-100 text-white`}
-      >
-        |
-      </span>
-    </motion.div>
+      {/* Minimalist architectural tracking line */}
+      <motion.div 
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="w-8 md:w-12 h-[1px] bg-white/40 origin-left" 
+      />
+      
+      {/* The Masked Ticker Container */}
+      <div className="relative h-6 md:h-8 overflow-hidden flex items-center">
+        {/* AnimatePresence allows elements to animate OUT before disappearing */}
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={index}
+            initial={{ y: 20, opacity: 0, filter: "blur(8px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            exit={{ y: -20, opacity: 0, filter: "blur(8px)" }}
+            // Custom easing curve for that premium "Apple" feel
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
+            className="text-white/80 font-mono text-[10px] md:text-xs uppercase tracking-[0.25em] font-medium whitespace-nowrap"
+          >
+            {services[index]}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
