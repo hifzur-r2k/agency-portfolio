@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-// We moved the TypewriterTag directly into this file to completely bypass Turbopack's import cache glitch.
+// Retaining the bypassed component to prevent Turbopack caching errors
 function TypewriterTag({ text, delay = 0 }: { text: string; delay?: number }) {
   const chars = text.split("");
 
@@ -19,7 +19,7 @@ function TypewriterTag({ text, delay = 0 }: { text: string; delay?: number }) {
           transition: { staggerChildren: 0.05, delayChildren: delay },
         },
       }}
-      className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest flex mb-8"
+      className="font-mono text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest flex mb-6 md:mb-8"
     >
       {chars.map((char, i) => (
         <motion.span
@@ -42,7 +42,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col gap-10 md:gap-16 relative z-10">
         
         {/* TOP ROW: Header & CTA */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <h2 className="text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter max-w-2xl leading-[0.9]">
             Let's Build <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-gray-700">
@@ -53,17 +53,19 @@ export default function Footer() {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full md:w-auto bg-white text-black px-8 py-5 md:py-4 rounded-full font-bold uppercase tracking-widest text-xs md:text-sm shadow-xl"
+            // FIX 1: Changed 'w-full' to 'w-fit' so it remains a sleek pill on mobile
+            className="w-fit bg-white text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs md:text-sm shadow-xl"
           >
             Start a Project
           </motion.button>
         </div>
 
         {/* BOTTOM ROW: The Glass Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-4 md:mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-2 md:mt-8">
           
           {/* Box 1: Location */}
-          <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-white/5 flex flex-col justify-between min-h-[180px] md:aspect-square backdrop-blur-sm">
+          {/* FIX 2: Removed forced min-height and used natural gap spacing for organic mobile sizing */}
+          <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-white/5 flex flex-col gap-6 md:justify-between md:aspect-square backdrop-blur-sm">
             <TypewriterTag text="#HEADQUARTERS" />
             <div>
               <p className="text-xl md:text-2xl font-medium tracking-tight">New Delhi, India</p>
@@ -72,7 +74,7 @@ export default function Footer() {
           </div>
 
           {/* Box 2: Social Links */}
-          <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-white/5 flex flex-col justify-between min-h-[180px] md:aspect-square backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-white/5 flex flex-col gap-6 md:justify-between md:aspect-square backdrop-blur-sm">
             <TypewriterTag text="#SOCIAL_NETWORK" delay={0.2} />
             <div className="flex flex-col gap-2">
               <a href="#" className="text-base md:text-xl text-white/80 hover:text-white transition-colors">Instagram</a>
@@ -83,12 +85,14 @@ export default function Footer() {
 
           {/* Box 3: Portfolio Link */}
           <Link href="/portfolio" className="block h-full">
-            <div className="bg-white text-black p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] flex flex-col justify-between min-h-[180px] md:aspect-square group cursor-none hover:bg-gray-200 transition-colors shadow-lg">
-              <p className="text-gray-500 font-mono uppercase tracking-widest text-[10px] md:text-xs font-bold mb-8">
-                #NEXT_PAGE
-              </p>
+            <div className="bg-white text-black p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] flex flex-col gap-6 md:justify-between md:aspect-square group cursor-none hover:bg-gray-200 transition-colors shadow-lg">
+              
+              {/* FIX 3: Actually applied the TypewriterTag here! */}
+              <TypewriterTag text="#NEXT_PAGE" delay={0.4} />
+              
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tighter group-hover:translate-x-2 transition-transform duration-300">
+                {/* FIX 4: Changed tracking-tighter to tracking-tight to fix the word collision */}
+                <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tight group-hover:translate-x-2 transition-transform duration-300">
                   View Portfolio
                 </h3>
                 <span className="text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
