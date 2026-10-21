@@ -58,7 +58,7 @@ export default function Footer() {
           <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-5 md:p-8 rounded-[1.25rem] md:rounded-[2rem] border border-white/5 flex flex-col gap-4 md:gap-10 md:justify-between md:aspect-square backdrop-blur-sm">
             <TypewriterTag text="#HEADQUARTERS" />
             <div>
-              <p className="text-xl md:text-2xl font-medium tracking-tight">New Delhi, India</p>
+              <p className="text-xl md:text-2xl font-medium tracking-tight">Gorakhpur, INDIA</p>
               <p className="text-gray-500 text-xs md:text-sm mt-1">Available Worldwide</p>
             </div>
           </div>
