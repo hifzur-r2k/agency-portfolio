@@ -164,7 +164,7 @@ export default function Navigation() {
           </div>
 
           <a 
-            href="mailto:hello@agency.com" 
+            href="#contact"
             className="hidden md:block px-6 py-3 mr-1 rounded-full bg-white text-black text-xs font-bold uppercase tracking-[0.2em] hover:scale-105 transition-transform"
           >
             Start Project
@@ -215,7 +215,7 @@ export default function Navigation() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                href="mailto:hello@agency.com"
+                href="#contact"
                 className="mt-4 px-8 py-4 rounded-full bg-white text-black text-sm font-bold shadow-xl hover:scale-105 transition-transform"
               >
                 START PROJECT

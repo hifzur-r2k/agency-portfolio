@@ -4,6 +4,7 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
 import Navigation from "@/components/Navigation"; 
+import ContactModal from "@/components/ContactModal"; // 1. Imported the Modal here!
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,6 +44,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-[#050505] text-[#FAFAFA] antialiased selection:bg-white selection:text-black`}>
+        
+        {/* 2. Placed the Modal OUTSIDE SmoothScroll so it stays perfectly fixed on the screen */}
+        <ContactModal />
+        
         <SmoothScroll>
           <CustomCursor />
           <Navigation /> 

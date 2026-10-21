@@ -30,28 +30,30 @@ export default function Footer() {
   return (
     <section className="w-full bg-[#050505] text-[#FAFAFA] pt-16 pb-24 md:py-24 px-4 md:px-8 border-t border-white/5 z-10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col gap-8 md:gap-16 relative z-10">
-        
+
         {/* TOP ROW: Header & CTA */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
           <h2 className="text-4xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter max-w-2xl leading-[0.9]">
-            Let's Build <br/>
+            Let's Build <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-gray-700">
               Something
             </span>
           </h2>
-          
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="self-start md:self-end bg-white text-black px-6 py-3 md:px-8 md:py-4 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-sm shadow-xl"
-          >
-            Start a Project
-          </motion.button>
+
+          <a href="#contact">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="self-start md:self-end bg-white text-black px-6 py-3 md:px-8 md:py-4 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-sm shadow-xl"
+            >
+              Start a Project
+            </motion.button>
+          </a>
         </div>
 
         {/* BOTTOM ROW: The Glass Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-2">
-          
+
           {/* Box 1: Location */}
           <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-5 md:p-8 rounded-[1.25rem] md:rounded-[2rem] border border-white/5 flex flex-col gap-4 md:gap-10 md:justify-between md:aspect-square backdrop-blur-sm">
             <TypewriterTag text="#HEADQUARTERS" />
@@ -65,7 +67,7 @@ export default function Footer() {
           <div className="bg-gradient-to-br from-white/[0.04] to-transparent p-5 md:p-8 rounded-[1.25rem] md:rounded-[2rem] border border-white/5 flex flex-col gap-4 md:justify-between md:aspect-square backdrop-blur-sm">
             <TypewriterTag text="#SOCIAL_NETWORK" delay={0.2} />
             <div className="flex flex-col gap-4 w-full">
-              
+
               {/* Instagram */}
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between w-full text-white/70 hover:text-white transition-colors">
                 <div className="flex items-center gap-3">
@@ -88,18 +90,18 @@ export default function Footer() {
                   </svg>
                   <span className="text-base md:text-lg">LinkedIn</span>
                 </div>
-                
+
               </a>
 
               {/* Twitter (X) */}
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between w-full text-white/70 hover:text-white transition-colors">
                 <div className="flex items-center gap-3">
                   <svg viewBox="0 0 24 24" className="w-4 h-4 ml-0.5" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                   <span className="text-base md:text-lg">Twitter (X)</span>
                 </div>
-            
+
               </a>
 
             </div>
