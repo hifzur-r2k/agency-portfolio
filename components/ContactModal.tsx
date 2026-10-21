@@ -66,18 +66,27 @@ export default function ContactModal() {
     if (!validateForm()) return;
 
     setStatus("loading");
-    const serverData = new FormData();
-    serverData.append("name", formData.name);
-    serverData.append("email", formData.email);
-    serverData.append("message", formData.message);
+    
+    try {
+      const serverData = new FormData();
+      serverData.append("name", formData.name);
+      serverData.append("email", formData.email);
+      serverData.append("message", formData.message);
 
-    const result = await sendEmail(serverData);
-    if (result?.error) {
+      const result = await sendEmail(serverData);
+      
+      if (result?.error) {
+        setStatus("error");
+        setErrors({ message: result.error });
+      } else {
+        setStatus("success");
+        setTimeout(() => closeModal(), 5000);
+      }
+    } catch (error) {
+      // THIS CATCHES FATAL SERVER CRASHES!
+      console.error("Submission failed:", error);
       setStatus("error");
-      setErrors({ message: result.error });
-    } else {
-      setStatus("success");
-      setTimeout(() => closeModal(), 5000);
+      setErrors({ message: "Server connection failed. Please try again." });
     }
   };
 

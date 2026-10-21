@@ -5,16 +5,17 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async (formData: FormData) => {
-  const name = formData.get("name");
-  const email = formData.get("email");
-  const message = formData.get("message"); // Removed budget
-
-  if (!name || !email || !message) {
-    return { error: "Please fill out all required fields." };
-  }
-
   try {
-    await resend.emails.send({
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const message = formData.get("message");
+
+    if (!name || !email || !message) {
+      return { error: "Please fill out all required fields." };
+    }
+
+    // Resend SDK v3 returns { data, error } instead of throwing
+    const { data, error } = await resend.emails.send({
       from: "Agency Portfolio <onboarding@resend.dev>",
       to: "contact.zerogravityspace@gmail.com",
       subject: `New Project Inquiry from ${name}`,
@@ -31,9 +32,16 @@ export const sendEmail = async (formData: FormData) => {
       `,
     });
 
+    // Catch Resend API errors (like bad API keys or unverified domains)
+    if (error) {
+      console.error("Resend API Error:", error.message);
+      return { error: "Email provider error. Please try again later." };
+    }
+
     return { success: true };
-  } catch (error) {
-    console.error("Resend Error:", error);
-    return { error: "Failed to send message. Please try again." };
+  } catch (e: any) {
+    // Catch fatal server crashes
+    console.error("Server Action Error:", e);
+    return { error: "Internal server error. Please try again." };
   }
 };
