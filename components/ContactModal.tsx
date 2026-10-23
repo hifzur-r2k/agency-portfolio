@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendEmail } from "@/app/actions/sendEmail";
+// 1. IMPORT THE TRACKING FUNCTION
+import { track } from "@vercel/analytics"; 
 
 export default function ContactModal() {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // UI Routing State (selection -> message OR calendar)
   const [view, setView] = useState<"selection" | "message" | "calendar">("selection");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
 
@@ -27,6 +26,8 @@ export default function ContactModal() {
     const handleHashChange = () => {
       if (window.location.hash === "#contact") {
         setIsOpen(true);
+        // 2. TRACK WHEN SOMEONE OPENS THE MODAL
+        track("Opened Contact Modal"); 
       } else {
         setIsOpen(false);
         setTimeout(resetState, 500);
@@ -81,6 +82,8 @@ export default function ContactModal() {
         setErrors({ message: result.error });
       } else {
         setStatus("success");
+        // 3. TRACK SUCCESSFUL INQUIRIES
+        track("Successfully Sent Message"); 
         setTimeout(() => closeModal(), 5000);
       }
     } catch (error) {
@@ -95,7 +98,6 @@ export default function ContactModal() {
       {isOpen && (
         <div className="fixed inset-0 z-[9999999] flex items-center justify-center p-3 md:p-8">
           
-          {/* Heavy Backdrop */}
           <motion.div
             initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
             animate={{ opacity: 1, backdropFilter: "blur(24px)" }}
@@ -104,7 +106,6 @@ export default function ContactModal() {
             className="absolute inset-0 bg-[#020202]/80"
           />
 
-          {/* Modal Container */}
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -113,7 +114,6 @@ export default function ContactModal() {
             className="relative w-full max-w-4xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-[#080808] border border-white/10 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl flex flex-col"
           >
             
-            {/* Global Close Button */}
             <button 
               onClick={closeModal}
               className="absolute top-5 right-5 md:top-8 md:right-8 text-white/30 hover:text-white transition-colors p-2 z-50 bg-black/20 hover:bg-white/10 rounded-full backdrop-blur-md"
@@ -123,7 +123,6 @@ export default function ContactModal() {
               </svg>
             </button>
 
-            {/* Back Button (Only shows when deep in a view) */}
             <AnimatePresence>
               {view !== "selection" && status !== "success" && (
                 <motion.button
@@ -144,9 +143,6 @@ export default function ContactModal() {
             <div className="flex-1 w-full h-full flex flex-col items-center justify-center relative min-h-[500px]">
               <AnimatePresence mode="wait">
                 
-                {/* ----------------------------- */}
-                {/* VIEW 1: THE SELECTION HUB       */}
-                {/* ----------------------------- */}
                 {view === "selection" && (
                   <motion.div
                     key="selection"
@@ -164,9 +160,12 @@ export default function ContactModal() {
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full max-w-2xl">
-                      {/* Option A: Calendar */}
                       <button 
-                        onClick={() => setView("calendar")}
+                        onClick={() => {
+                          setView("calendar");
+                          // 4. TRACK CALENDAR CLICKS
+                          track("Clicked Book a Call");
+                        }}
                         className="group relative flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white/[0.02] border border-white/10 rounded-3xl hover:bg-white/[0.04] hover:border-white/20 transition-all duration-300 overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors duration-500" />
@@ -182,9 +181,12 @@ export default function ContactModal() {
                         <p className="text-xs text-gray-500">Schedule a 30-min discovery session via Google Meet.</p>
                       </button>
 
-                      {/* Option B: Message */}
                       <button 
-                        onClick={() => setView("message")}
+                        onClick={() => {
+                          setView("message");
+                          // 5. TRACK MESSAGE CLICKS
+                          track("Clicked Send Message");
+                        }}
                         className="group relative flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white/[0.02] border border-white/10 rounded-3xl hover:bg-white/[0.04] hover:border-white/20 transition-all duration-300 overflow-hidden"
                       >
                         <div className="w-14 h-14 bg-white/[0.05] rounded-full flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300">
@@ -200,9 +202,6 @@ export default function ContactModal() {
                   </motion.div>
                 )}
 
-                {/* ----------------------------- */}
-                {/* VIEW 2: FULL-WIDTH CALENDAR     */}
-                {/* ----------------------------- */}
                 {view === "calendar" && (
                   <motion.div
                     key="calendar"
@@ -210,7 +209,6 @@ export default function ContactModal() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
-                    // FIXED: Added flex flex-col to force the iframe to stretch properly
                     className="w-full h-full flex flex-col flex-1 pt-16 md:pt-20 px-2 md:px-4 pb-4"
                   >
                     <iframe 
@@ -218,16 +216,12 @@ export default function ContactModal() {
                       width="100%" 
                       height="100%" 
                       frameBorder="0" 
-                      // FIXED: Placed strict min-height boundaries directly onto the iframe
                       className="w-full flex-1 min-h-[600px] md:min-h-[700px] rounded-2xl"
                       title="Schedule a Discovery Call"
                     />
                   </motion.div>
                 )}
 
-                {/* ----------------------------- */}
-                {/* VIEW 3: FULL-WIDTH FORM         */}
-                {/* ----------------------------- */}
                 {view === "message" && status !== "success" && (
                   <motion.div
                     key="message"
@@ -308,9 +302,6 @@ export default function ContactModal() {
                   </motion.div>
                 )}
 
-                {/* ----------------------------- */}
-                {/* VIEW 4: SUCCESS SCREEN          */}
-                {/* ----------------------------- */}
                 {status === "success" && (
                   <motion.div
                     key="success"
