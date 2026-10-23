@@ -5,6 +5,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
 import Navigation from "@/components/Navigation"; 
 import ContactModal from "@/components/ContactModal"; // 1. Imported the Modal here!
+import { Analytics } from "@vercel/analytics/react"; // <-- Added Vercel Analytics import
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,6 +54,9 @@ export default function RootLayout({
           <Navigation /> 
           {children}
         </SmoothScroll>
+
+        {/* 3. Added the Analytics component globally outside the scroll wrapper */}
+        <Analytics />
       </body>
     </html>
   );
