@@ -9,7 +9,9 @@ import Services from "../components/Services";
 import Marquee from "../components/Marquee"; 
 import Footer from "../components/Footer"; 
 import Hero3D from "../components/Hero3D"; 
-import Typewriter from "../components/Typewriter"; // Imported the new component
+import Typewriter from "../components/Typewriter";
+// 1. IMPORT THE NEW GALLERY
+import FloatingGallery from "../components/FloatingGallery"; 
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,20 +77,23 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* SECTION 2: THE MANIFESTO */}
+      {/* 2. THE NEW FLOATING GALLERY PORTFOLIO SECTION */}
+      <FloatingGallery />
+
+      {/* SECTION 3: THE MANIFESTO */}
       <section className="h-screen w-full flex items-center justify-center p-8 bg-[#FAFAFA] text-[#050505]">
         <h2 ref={textRef} className="text-3xl md:text-6xl font-medium max-w-5xl leading-tight text-center">
           We don't just build websites or shoot videos. We craft <span className="font-serif italic">digital ecosystems</span> that Astonish visitors and convert them into absolute loyalists.
         </h2>
       </section>
 
-      {/* SECTION 3: THE SERVICES SHOWCASE */}
+      {/* SECTION 4: THE SERVICES SHOWCASE */}
       <Services />
 
-      {/* SECTION 4: THE INFINITE MARQUEE */}
+      {/* SECTION 5: THE INFINITE MARQUEE */}
       <Marquee />
 
-      {/* SECTION 5: THE EXPERIENCE TERMINAL (FOOTER) */}
+      {/* SECTION 6: THE EXPERIENCE TERMINAL (FOOTER) */}
       <Footer />
 
     </main>
