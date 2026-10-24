@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendEmail } from "@/app/actions/sendEmail";
-// 1. IMPORT THE TRACKING FUNCTION
-import { track } from "@vercel/analytics"; 
+// 1. IMPORT POSTHOG
+import { usePostHog } from "posthog-js/react"; 
 
 export default function ContactModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +12,9 @@ export default function ContactModal() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+
+  // 2. INITIALIZE POSTHOG HOOK
+  const posthog = usePostHog();
 
   const wordCount = formData.message.trim() === "" ? 0 : formData.message.trim().split(/\s+/).length;
 
@@ -26,8 +29,8 @@ export default function ContactModal() {
     const handleHashChange = () => {
       if (window.location.hash === "#contact") {
         setIsOpen(true);
-        // 2. TRACK WHEN SOMEONE OPENS THE MODAL
-        track("Opened Contact Modal"); 
+        // 3. CAPTURE MODAL OPEN
+        posthog?.capture("Opened Contact Modal"); 
       } else {
         setIsOpen(false);
         setTimeout(resetState, 500);
@@ -38,7 +41,7 @@ export default function ContactModal() {
     handleHashChange();
 
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+  }, [posthog]);
 
   const closeModal = () => {
     window.history.pushState(null, "", window.location.pathname);
@@ -82,8 +85,8 @@ export default function ContactModal() {
         setErrors({ message: result.error });
       } else {
         setStatus("success");
-        // 3. TRACK SUCCESSFUL INQUIRIES
-        track("Successfully Sent Message"); 
+        // 4. CAPTURE FORM SUCCESS
+        posthog?.capture("Successfully Sent Message"); 
         setTimeout(() => closeModal(), 5000);
       }
     } catch (error) {
@@ -163,8 +166,8 @@ export default function ContactModal() {
                       <button 
                         onClick={() => {
                           setView("calendar");
-                          // 4. TRACK CALENDAR CLICKS
-                          track("Clicked Book a Call");
+                          // 5. CAPTURE CALENDAR CLICK
+                          posthog?.capture("Clicked Book a Call");
                         }}
                         className="group relative flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white/[0.02] border border-white/10 rounded-3xl hover:bg-white/[0.04] hover:border-white/20 transition-all duration-300 overflow-hidden"
                       >
@@ -184,8 +187,8 @@ export default function ContactModal() {
                       <button 
                         onClick={() => {
                           setView("message");
-                          // 5. TRACK MESSAGE CLICKS
-                          track("Clicked Send Message");
+                          // 6. CAPTURE MESSAGE CLICK
+                          posthog?.capture("Clicked Send Message");
                         }}
                         className="group relative flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white/[0.02] border border-white/10 rounded-3xl hover:bg-white/[0.04] hover:border-white/20 transition-all duration-300 overflow-hidden"
                       >

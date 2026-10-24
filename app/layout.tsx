@@ -4,8 +4,9 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
 import Navigation from "@/components/Navigation"; 
-import ContactModal from "@/components/ContactModal"; // 1. Imported the Modal here!
-import { Analytics } from "@vercel/analytics/react"; // <-- Added Vercel Analytics import
+import ContactModal from "@/components/ContactModal";
+// 1. Replaced Vercel with PostHog
+import { PostHogProvider } from "@/components/PostHogProvider"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,6 @@ export const metadata: Metadata = {
     siteName: "Agency©",
     images: [
       {
-        // This image shows up when you paste the link in WhatsApp/LinkedIn/iMessage
         url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop", 
         width: 1200,
         height: 630,
@@ -46,17 +46,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-[#050505] text-[#FAFAFA] antialiased selection:bg-white selection:text-black`}>
         
-        {/* 2. Placed the Modal OUTSIDE SmoothScroll so it stays perfectly fixed on the screen */}
-        <ContactModal />
-        
-        <SmoothScroll>
-          <CustomCursor />
-          <Navigation /> 
-          {children}
-        </SmoothScroll>
+        {/* 2. Wrap all your components inside the PostHogProvider */}
+        <PostHogProvider>
+          <ContactModal />
+          
+          <SmoothScroll>
+            <CustomCursor />
+            <Navigation /> 
+            {children}
+          </SmoothScroll>
+        </PostHogProvider>
 
-        {/* 3. Added the Analytics component globally outside the scroll wrapper */}
-        <Analytics />
       </body>
     </html>
   );
