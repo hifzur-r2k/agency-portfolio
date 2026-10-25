@@ -64,3 +64,28 @@ export async function verifyPasscode(passcode: string) {
 
     return passcode === masterPass;
 }
+// Add this to the bottom of app/admin/studio/actions.ts
+export async function updatePortfolioImage(id: number, formData: FormData) {
+  const top_pos = formData.get("top_pos") as string;
+  const left_pos = formData.get("left_pos") as string;
+  const width_class = formData.get("width_class") as string;
+  const speed = Number(formData.get("speed"));
+  const depth = Number(formData.get("depth"));
+  const aspect_ratio = formData.get("aspect_ratio") as string;
+
+  try {
+    await sql`
+      UPDATE portfolio_images 
+      SET top_pos = ${top_pos}, left_pos = ${left_pos}, width_class = ${width_class}, 
+          speed = ${speed}, depth = ${depth}, aspect_ratio = ${aspect_ratio}
+      WHERE id = ${id}
+    `;
+    
+    revalidatePath('/'); 
+    revalidatePath('/admin/studio');
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update image:", error);
+    throw new Error("Failed to update image");
+  }
+}
