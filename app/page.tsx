@@ -11,7 +11,7 @@ import Footer from "../components/Footer";
 import Hero3D from "../components/Hero3D"; 
 import Typewriter from "../components/Typewriter";
 // 1. IMPORT THE NEW GALLERY
-import FloatingGallery from "../components/FloatingGallery"; 
+import FloatingGallery from "@/components/FloatingGallery";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -78,7 +78,7 @@ export default function Home() {
       </section>
 
       {/* 2. THE NEW FLOATING GALLERY PORTFOLIO SECTION */}
-      <FloatingGallery />
+      <FloatingGallery/>
 
       {/* SECTION 3: THE MANIFESTO */}
       <section className="h-screen w-full flex items-center justify-center p-8 bg-[#FAFAFA] text-[#050505]">
