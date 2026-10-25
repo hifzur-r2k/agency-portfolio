@@ -39,7 +39,10 @@ export default function AdminStudio() {
     const handleDelete = async (id: number) => {
         if (window.confirm("Are you sure you want to remove this image from your live portfolio?")) {
             await deletePortfolioImage(id);
-            setDbImages(dbImages.filter(img => img.id !== id));
+
+            // Pull the fresh, true database data instead of just filtering the local state
+            const freshData = await getPortfolioImages();
+            setDbImages(freshData || []);
         }
     };
     if (!isAuthenticated) {
@@ -163,10 +166,9 @@ export default function AdminStudio() {
                                         await saveImageToDatabase(formData);
                                         alert("Image securely locked into the database!");
 
-                                        setDbImages([...dbImages, {
-                                            id: Date.now(), src: uploadedImage, top_pos: activePreset.top, left_pos: activePreset.left,
-                                            width_class: activePreset.width, aspect_ratio: activePreset.aspect
-                                        }]);
+                                        // Fetch the real IDs from the database instantly after saving
+                                        const freshData = await getPortfolioImages();
+                                        setDbImages(freshData || []);
 
                                         setUploadedImage(null);
                                         setIsSaving(false);
