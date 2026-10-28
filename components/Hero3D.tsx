@@ -30,7 +30,7 @@ function LiquidShape() {
       >
         {/* This material is the secret to the liquid distortion */}
         <MeshDistortMaterial
-          color={hovered ? "#ffffff" : "#333333"}
+          color={hovered ? "#ffffff" : "#555555"}
           attach="material"
           distort={0.5} // How chaotic the liquid is
           speed={2} // How fast it boils/morphs
