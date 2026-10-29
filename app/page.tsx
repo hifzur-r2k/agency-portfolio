@@ -161,13 +161,6 @@ export default function Home() {
         <FloatingGallery />
       </div>
 
-      {/* SECTION 3: THE MANIFESTO */}
-      <section className="h-screen w-full flex items-center justify-center p-8 bg-[#FAFAFA] text-[#050505]">
-        <h2 ref={textRef} className="text-3xl md:text-6xl font-medium max-w-5xl leading-tight text-center">
-          We don't just build websites or shoot videos. We craft <span className="font-serif italic">digital ecosystems</span> that astonish visitors and convert them into absolute loyalists.
-        </h2>
-      </section>
-
       {/* SECTION 4: THE SERVICES SHOWCASE (Wrapped with #services ID) */}
       <div id="services" className="w-full">
         <Services />
