@@ -43,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={`${inter.className} bg-[#050505] text-[#FAFAFA] antialiased selection:bg-white selection:text-black`}>
         
         {/* 2. Wrap all your components inside the PostHogProvider */}

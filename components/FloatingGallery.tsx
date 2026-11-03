@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { getPortfolioImages } from "@/app/admin/studio/actions";
@@ -17,7 +17,6 @@ const fallbackImages = [
   { id: 8, src: "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?q=80&w=800&auto=format&fit=crop", top: "78%", left: "55%", width: "w-[28vw] md:w-[16vw]", speed: 0.12, depth: 15, aspect: "aspect-[4/5]" }
 ];
 
-// Fallback Aspect Ratio CSS Parser just in case Tailwind misses it
 const getAspectRatioCSS = (aspectClass: string) => {
   if (!aspectClass) return '4 / 5';
   if (aspectClass === 'aspect-square') return '1 / 1';
@@ -26,23 +25,40 @@ const getAspectRatioCSS = (aspectClass: string) => {
   return match ? match[1].replace('/', ' / ') : '4 / 5';
 };
 
-// NEW: The Card now accepts a full ARRAY of images (an imageGroup)
-function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY, windowHeight, hoveredId, setHoveredId }: any) {
+// FRAMER MOTION SLIDE VARIANTS (Fixes the function error)
+const slideVariants = {
+  enter: (direction: number) => ({
+    opacity: 0,
+    x: direction > 0 ? 100 : -100,
+    scale: 0.95
+  }),
+  center: {
+    opacity: 1,
+    x: 0,
+    scale: 1
+  },
+  exit: (direction: number) => ({
+    opacity: 0,
+    x: direction > 0 ? -100 : 100,
+    scale: 0.95
+  })
+};
+
+// THE FLOATING CARD COMPONENT
+function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY, windowHeight, hoveredId, setHoveredId, onExpand }: any) {
   const height = windowHeight || 1000;
 
-  // State for the slideshow
   const [currentIndex, setCurrentIndex] = useState(0);
+  const touchTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // The slideshow timer logic (only runs if there is more than 1 image in the slot)
   useEffect(() => {
     if (imageGroup.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % imageGroup.length);
-    }, 3500); // Changes image every 3.5 seconds
+    }, 3500); 
     return () => clearInterval(interval);
   }, [imageGroup.length]);
 
-  // We use the first image to define the layout physics for the entire slot
   const baseImg = imageGroup[0];
   const currentImg = imageGroup[currentIndex];
   const groupId = baseImg.id;
@@ -63,10 +79,26 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
   const isHovered = hoveredId === groupId;
   const isOtherHovered = hoveredId !== null && hoveredId !== groupId;
 
+  // LONG PRESS LOGIC (MOBILE)
+  const handleTouchStart = () => {
+    touchTimer.current = setTimeout(() => {
+      onExpand(imageGroup, currentIndex);
+    }, 800);
+  };
+
+  const cancelTouch = () => {
+    if (touchTimer.current) clearTimeout(touchTimer.current);
+  };
+
   return (
     <motion.div
       onMouseEnter={() => setHoveredId(groupId)}
       onMouseLeave={() => setHoveredId(null)}
+      onDoubleClick={() => onExpand(imageGroup, currentIndex)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={cancelTouch}
+      onTouchMove={cancelTouch}
+      onTouchCancel={cancelTouch}
       className={`absolute ${width} rounded-xl overflow-hidden border border-white/10 pointer-events-auto transition-all duration-500 ease-out ${isHovered ? 'z-50 scale-105 shadow-[0_0_30px_rgba(255,255,255,0.1)]' :
         isOtherHovered ? 'z-10 opacity-60' :
           'z-20 opacity-100 shadow-2xl scale-100'
@@ -76,7 +108,6 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
         aspectRatio: getAspectRatioCSS(aspect)
       }}
     >
-      {/* THE SLIDESHOW ENGINE: Smooth Crossfading between images */}
       <AnimatePresence mode="popLayout">
         <motion.div
           key={currentImg.id}
@@ -98,7 +129,6 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
 
       <div className={`absolute inset-0 bg-black/20 pointer-events-none transition-opacity duration-500 ${isHovered ? 'opacity-0' : 'opacity-100'}`} />
 
-      {/* AAA TOUCH: Dot Indicators for stacked images (Only reveals on hover) */}
       {imageGroup.length > 1 && (
         <div className={`absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-40 transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
           {imageGroup.map((_: any, idx: number) => (
@@ -113,12 +143,17 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
   );
 }
 
+// THE MAIN GALLERY COMPONENT
 export default function FloatingGallery() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [windowHeight, setWindowHeight] = useState(0);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-
   const [dbImages, setDbImages] = useState<any[]>([]);
+
+  // EXPANDED MODAL STATES
+  const [expandedGroup, setExpandedGroup] = useState<any[] | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState(0); 
 
   useEffect(() => {
     async function loadImages() {
@@ -132,7 +167,6 @@ export default function FloatingGallery() {
 
   const displayImages = dbImages.length > 0 ? dbImages : fallbackImages;
 
-  // NEW: The Grouper. Combines all images that share exact coordinates into arrays!
   const groupedImages = Object.values(
     displayImages.reduce((acc: any, img: any) => {
       const key = `${img.top_pos || img.top}_${img.left_pos || img.left}`;
@@ -171,11 +205,67 @@ export default function FloatingGallery() {
     offset: ["start end", "end start"],
   });
 
+  // EXPAND MODAL HANDLERS
+  const handleExpand = useCallback((group: any[], index: number) => {
+    setExpandedGroup(group);
+    setExpandedIndex(index);
+    setSlideDirection(0);
+  }, []);
+
+  const closeExpanded = () => setExpandedGroup(null);
+
+  const nextSlide = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (expandedGroup) {
+      setSlideDirection(1);
+      setExpandedIndex((prev) => (prev + 1) % expandedGroup.length);
+    }
+  }, [expandedGroup]);
+
+  const prevSlide = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (expandedGroup) {
+      setSlideDirection(-1);
+      setExpandedIndex((prev) => (prev - 1 + expandedGroup.length) % expandedGroup.length);
+    }
+  }, [expandedGroup]);
+
+  // SWIPE HANDLER FOR MOBILE NATIVE FEEL
+  const handleDragEnd = (event: any, info: any) => {
+    const swipeThreshold = 50;
+    if (info.offset.x < -swipeThreshold) {
+      nextSlide();
+    } else if (info.offset.x > swipeThreshold) {
+      prevSlide();
+    }
+  };
+
+  // Lock body scroll and listen for keyboard events
+  useEffect(() => {
+    if (expandedGroup) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") closeExpanded();
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [expandedGroup, nextSlide, prevSlide]);
+
   return (
     <section ref={containerRef} className="relative w-full h-[120vh] md:h-[150vh] bg-[#050505] overflow-hidden flex items-center justify-center">
+      
+      {/* HERO TEXT */}
       <div 
         className={`relative z-20 flex flex-col items-center text-center pointer-events-none transition-all duration-700 ease-out ${
-          hoveredId !== null ? 'opacity-20 scale-95' : 'opacity-100 scale-100'
+          hoveredId !== null || expandedGroup !== null ? 'opacity-20 scale-95' : 'opacity-100 scale-100'
         }`}
       >
         <h2 className="text-5xl md:text-8xl lg:text-[10rem] font-black uppercase tracking-tighter leading-none text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
@@ -189,8 +279,8 @@ export default function FloatingGallery() {
         </p>
       </div>  
 
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {/* We map over the GROUPED images now instead of individual images */}
+      {/* FLOATING IMAGES LAYER */}
+      <div className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-700 ${expandedGroup ? 'opacity-0' : 'opacity-100'}`}>
         {groupedImages.map((group, index) => (
           <FloatingCard
             key={`group-${index}`}
@@ -201,9 +291,90 @@ export default function FloatingGallery() {
             windowHeight={windowHeight}
             hoveredId={hoveredId}
             setHoveredId={setHoveredId}
+            onExpand={handleExpand}
           />
         ))}
       </div>
+
+      {/* EXPANDED LIGHTBOX MODAL WITH SWIPE */}
+      <AnimatePresence>
+        {expandedGroup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            onClick={closeExpanded}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-8 touch-none"
+          >
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={closeExpanded}
+              className="absolute top-4 right-4 md:top-10 md:right-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all z-50 backdrop-blur-md cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* PREV ARROW */}
+            {expandedGroup.length > 1 && (
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all z-50 backdrop-blur-md cursor-pointer"
+              >
+                ←
+              </button>
+            )}
+
+            {/* SWIPEABLE IMAGE CONTAINER */}
+            <div className="relative w-full max-w-5xl h-[75vh] md:h-[85vh] flex items-center justify-center overflow-hidden">
+              <AnimatePresence mode="popLayout" custom={slideDirection}>
+                <motion.img
+                  key={expandedIndex}
+                  custom={slideDirection}
+                  src={expandedGroup[expandedIndex].src}
+                  alt="Expanded View"
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  drag={expandedGroup.length > 1 ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={handleDragEnd}
+                  onClick={(e) => e.stopPropagation()} 
+                  className="absolute w-auto h-auto max-w-full max-h-full object-contain rounded-xl cursor-grab active:cursor-grabbing"
+                />
+              </AnimatePresence>
+            </div>
+
+            {/* NEXT ARROW */}
+            {expandedGroup.length > 1 && (
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all z-50 backdrop-blur-md cursor-pointer"
+              >
+                →
+              </button>
+            )}
+
+            {/* DOT INDICATORS (BOTTOM) */}
+            {expandedGroup.length > 1 && (
+              <div className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex gap-2.5 z-50 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                {expandedGroup.map((_: any, idx: number) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => { e.stopPropagation(); setSlideDirection(idx > expandedIndex ? 1 : -1); setExpandedIndex(idx); }}
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                      idx === expandedIndex ? "w-6 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" : "w-2 bg-white/30 hover:bg-white/60"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

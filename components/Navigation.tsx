@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 
 export default function Navigation() {
   const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) return null;
   const [isOpen, setIsOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
   

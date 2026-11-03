@@ -89,3 +89,120 @@ export async function updatePortfolioImage(id: number, formData: FormData) {
     throw new Error("Failed to update image");
   }
 }
+
+// ==========================================
+// NEW: PORTFOLIO CASE STUDY ACTIONS
+// ==========================================
+
+async function ensurePortfolioTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS agency_projects (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      category TEXT NOT NULL,
+      impact TEXT DEFAULT '',
+      deliverables JSONB DEFAULT '[]',
+      images JSONB NOT NULL,
+      description TEXT DEFAULT '',
+      live_url TEXT DEFAULT '',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+}
+
+export async function getProjects() {
+  try {
+    await ensurePortfolioTable();
+    const { rows } = await sql`
+      SELECT id, title, category, impact, deliverables, images, description, live_url AS "liveUrl"
+      FROM agency_projects
+      ORDER BY created_at DESC;
+    `;
+    return rows;
+  } catch (error) {
+    console.error("Failed to fetch projects:", error);
+    return [];
+  }
+}
+
+export async function saveProject(formData: FormData) {
+  try {
+    await ensurePortfolioTable();
+
+    const title = formData.get("title") as string;
+    const category = formData.get("category") as string;
+    const impact = (formData.get("impact") as string) || "↗ Featured Case";
+    const description = (formData.get("description") as string) || "";
+    const liveUrl = (formData.get("liveUrl") as string) || "";
+    
+    const deliverablesRaw = (formData.get("deliverables") as string) || "";
+    const deliverables = deliverablesRaw.split(",").map(d => d.trim()).filter(Boolean);
+    
+    const imagesRaw = formData.get("images") as string;
+    const images = imagesRaw ? JSON.parse(imagesRaw) : [];
+
+    if (images.length === 0) throw new Error("At least one image is required.");
+
+    await sql`
+      INSERT INTO agency_projects (title, category, impact, deliverables, images, description, live_url)
+      VALUES (
+        ${title},
+        ${category},
+        ${impact},
+        ${JSON.stringify(deliverables)}::jsonb,
+        ${JSON.stringify(images)}::jsonb,
+        ${description},
+        ${liveUrl}
+      );
+    `;
+
+    revalidatePath("/portfolio");
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export async function deleteProject(id: number) {
+  try {
+    await sql`DELETE FROM agency_projects WHERE id = ${id};`;
+    revalidatePath("/portfolio");
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+export async function updateProject(id: number, formData: FormData) {
+  try {
+    const title = formData.get("title") as string;
+    const category = formData.get("category") as string;
+    const impact = (formData.get("impact") as string) || "↗ Featured Case";
+    const description = (formData.get("description") as string) || "";
+    const liveUrl = (formData.get("liveUrl") as string) || "";
+    
+    const deliverablesRaw = (formData.get("deliverables") as string) || "";
+    const deliverables = deliverablesRaw.split(",").map(d => d.trim()).filter(Boolean);
+    
+    const imagesRaw = formData.get("images") as string;
+    const images = imagesRaw ? JSON.parse(imagesRaw) : [];
+
+    if (images.length === 0) throw new Error("At least one image is required.");
+
+    await sql`
+      UPDATE agency_projects 
+      SET title = ${title}, 
+          category = ${category}, 
+          impact = ${impact}, 
+          deliverables = ${JSON.stringify(deliverables)}::jsonb, 
+          images = ${JSON.stringify(images)}::jsonb, 
+          description = ${description}, 
+          live_url = ${liveUrl}
+      WHERE id = ${id};
+    `;
+
+    revalidatePath("/portfolio");
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}

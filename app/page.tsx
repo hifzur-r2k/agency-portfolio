@@ -19,7 +19,8 @@ export default function Home() {
 
   useEffect(() => {
     const el = textRef.current;
-    
+    if (!el) return;
+
     gsap.fromTo(el, 
       { opacity: 0, y: 100 }, 
       {
