@@ -17,7 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Home() {
   const textRef = useRef(null);
   
-  const [contactMode, setContactMode] = useState<"cal" | "email">("cal");
+  const [contactMode, setContactMode] = useState<"cal" | "email" | "wa">("cal");
 
   useEffect(() => {
     const el = textRef.current;
@@ -130,16 +130,13 @@ export default function Home() {
       {/* SECTION 6: PREMIUM TERMINAL CONTACT SECTION */}
       <section id="contact" className="relative w-full py-20 md:py-32 bg-[#050505] border-t border-white/10 px-6 overflow-hidden">
         
-        {/* Subtle Ambient Background Gradient */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-white/[0.03] via-[#050505] to-[#050505] pointer-events-none"></div>
 
-        {/* FIX: Changed lg:items-center to lg:items-start so the calendar anchors to the top and doesn't get pushed off-screen */}
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 lg:items-start pt-4 lg:pt-10">
           
-          {/* LEFT COLUMN: Headings, Toggle, & Process Indicators */}
+          {/* LEFT COLUMN: Headings & 3-Way Toggle */}
           <div className="lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-left z-10">
             
-            {/* Live Status Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-6 backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               <span className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-gray-300">Accepting New Projects</span>
@@ -150,45 +147,59 @@ export default function Home() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-600">Scale?</span>
             </h2>
             
-            {/* FIX: Swapped robotic mono font for the elegant, human 'font-light' from the Hero section */}
             <p className="text-sm md:text-base text-gray-400 font-light tracking-wide max-w-[340px] mb-10 leading-relaxed">
-              We're excited to learn about your vision. Book a discovery call to map out your strategy, or drop us a message to get started.
+              We're excited to learn about your vision. Book a discovery call, drop us an email, or start a direct chat to get moving instantly.
             </p>
 
-            {/* Premium Pill Toggle */}
-            <div className="relative flex items-center p-1.5 bg-black border border-white/10 rounded-full z-20 shadow-[0_0_30px_rgba(255,255,255,0.03)] w-max mx-auto lg:mx-0">
+            {/* UPGRADED 3-Way Toggle (Better visibility, hover states, and minimalist icons) */}
+            <div className="relative flex items-center p-1.5 bg-white/[0.04] border border-white/10 rounded-full z-20 shadow-[0_0_30px_rgba(255,255,255,0.02)] w-max mx-auto lg:mx-0">
+              
               <button
                 onClick={() => setContactMode("cal")}
-                className={`px-6 py-3 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                className={`flex items-center gap-1.5 px-4 md:px-5 py-2.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
                   contactMode === "cal" 
-                    ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]" 
-                    : "text-gray-500 hover:text-white"
+                    ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
               >
-                Book a Call
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Book Call
               </button>
+
               <button
                 onClick={() => setContactMode("email")}
-                className={`px-6 py-3 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                className={`flex items-center gap-1.5 px-4 md:px-5 py-2.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
                   contactMode === "email" 
-                    ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]" 
-                    : "text-gray-500 hover:text-white"
+                    ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
               >
-                Send Message
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Email
+              </button>
+
+              <button
+                onClick={() => setContactMode("wa")}
+                className={`flex items-center gap-1.5 px-4 md:px-5 py-2.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                  contactMode === "wa" 
+                    ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                WhatsApp
               </button>
             </div>
 
-            {/* The 3-Step Process UI - Now using softer, sentence-case typography */}
-            <div className="mt-14 hidden lg:flex flex-col gap-6">
+            <div className="mt-12 hidden lg:flex flex-col gap-6">
               <div className="flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity">
                 <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white shadow-inner">1</div>
-                <p className="text-xs font-medium text-gray-300">Find a time that works for you</p>
+                <p className="text-xs font-medium text-gray-300">Choose your communication channel</p>
               </div>
               <div className="w-[1px] h-4 bg-white/10 ml-4 -my-4"></div>
               <div className="flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity">
                 <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white shadow-inner">2</div>
-                <p className="text-xs font-medium text-gray-300">Receive a calendar invite & agenda</p>
+                <p className="text-xs font-medium text-gray-300">Share your vision and requirements</p>
               </div>
               <div className="w-[1px] h-4 bg-white/10 ml-4 -my-4"></div>
               <div className="flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity">
@@ -201,7 +212,6 @@ export default function Home() {
           {/* RIGHT COLUMN: The Glowing Glassmorphic Container */}
           <div className="lg:col-span-7 w-full h-[650px] lg:h-[620px] flex items-start justify-center relative mt-8 lg:mt-0">
             
-            {/* The Ambient Glow behind the container */}
             <div className="absolute inset-4 bg-gradient-to-r from-gray-500/20 to-gray-800/20 rounded-[2rem] blur-2xl opacity-50 z-0"></div>
 
             {/* LAYER 1: CAL.COM IFRAME */}
@@ -217,7 +227,7 @@ export default function Home() {
               />
             </div>
 
-            {/* LAYER 2: PREMIUM EMAIL FORM */}
+            {/* LAYER 2: EMAIL FORM */}
             <div
               className={`absolute w-full max-w-xl bg-[#080808]/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 md:p-10 shadow-2xl transition-all duration-500 ease-in-out z-10 ${
                 contactMode === "email" ? "opacity-100 pointer-events-auto scale-100" : "opacity-0 pointer-events-none scale-[0.98]"
@@ -246,6 +256,39 @@ export default function Home() {
                   </span>
                 </button>
               </form>
+            </div>
+
+            {/* LAYER 3: WHATSAPP DIRECT CHAT */}
+            <div
+              className={`absolute w-full max-w-xl bg-[#080808]/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 md:p-14 shadow-2xl transition-all duration-500 ease-in-out z-10 flex flex-col items-center justify-center text-center mt-8 lg:mt-0 ${
+                contactMode === "wa" ? "opacity-100 pointer-events-auto scale-100" : "opacity-0 pointer-events-none scale-[0.98]"
+              }`}
+            >
+              <div className="w-20 h-20 bg-white/[0.03] border border-white/10 rounded-full flex items-center justify-center mb-6 text-white shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+              </div>
+              <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white mb-4">
+                Instant Access.
+              </h3>
+              <p className="text-sm text-gray-400 font-light tracking-wide mb-10 max-w-sm mx-auto leading-relaxed">
+                Skip the forms. Connect directly with our lead strategist on WhatsApp to discuss your project in real-time.
+              </p>
+              
+              <a 
+                href="https://wa.me/916388776067?text=Hey%20Zero%20Gravity%20team!%20I'd%20like%20to%20discuss%20a%20project."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-[11px] md:text-xs rounded-xl overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-transform hover:scale-[1.02] active:scale-95 flex justify-center items-center"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span className="relative flex items-center justify-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                  Open WhatsApp Chat
+                  <span className="transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform ml-1">↗</span>
+                </span>
+              </a>
             </div>
               
           </div>
