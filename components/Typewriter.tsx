@@ -13,7 +13,6 @@ const services = [
 export default function Typewriter() {
   const [index, setIndex] = useState(0);
 
-  // Cycles through the words every 3 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % services.length);
@@ -23,8 +22,9 @@ export default function Typewriter() {
 
   return (
     <div 
-      // Positioned cleanly in the corner, pushed down slightly on mobile
-      className="absolute top-24 left-6 md:top-12 md:left-12 z-50 flex items-center gap-4 pointer-events-none"
+      // FIX: Hidden on tablet widths (md:hidden lg:flex) so it never collides with the navigation pill, 
+      // but visible on mobile and large desktop screens!
+      className="absolute top-24 left-6 hidden lg:flex md:top-10 md:left-12 z-50 items-center gap-4 pointer-events-none"
     >
       {/* Minimalist architectural tracking line */}
       <motion.div 
@@ -36,14 +36,12 @@ export default function Typewriter() {
       
       {/* The Masked Ticker Container */}
       <div className="relative h-6 md:h-8 overflow-hidden flex items-center">
-        {/* AnimatePresence allows elements to animate OUT before disappearing */}
         <AnimatePresence mode="popLayout">
           <motion.div
             key={index}
             initial={{ y: 20, opacity: 0, filter: "blur(8px)" }}
             animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
             exit={{ y: -20, opacity: 0, filter: "blur(8px)" }}
-            // Custom easing curve for that premium "Apple" feel
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
             className="text-white/80 font-mono text-[10px] md:text-xs uppercase tracking-[0.25em] font-medium whitespace-nowrap"
           >
