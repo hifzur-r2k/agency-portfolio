@@ -25,7 +25,6 @@ const getAspectRatioCSS = (aspectClass: string) => {
   return match ? match[1].replace('/', ' / ') : '4 / 5';
 };
 
-// FRAMER MOTION SLIDE VARIANTS (Fixes the function error)
 const slideVariants = {
   enter: (direction: number) => ({
     opacity: 0,
@@ -44,7 +43,6 @@ const slideVariants = {
   })
 };
 
-// THE FLOATING CARD COMPONENT
 function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY, windowHeight, hoveredId, setHoveredId, onExpand }: any) {
   const height = windowHeight || 1000;
 
@@ -83,7 +81,7 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
   const handleTouchStart = () => {
     touchTimer.current = setTimeout(() => {
       onExpand(imageGroup, currentIndex);
-    }, 800);
+    }, 600);
   };
 
   const cancelTouch = () => {
@@ -99,10 +97,15 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
       onTouchEnd={cancelTouch}
       onTouchMove={cancelTouch}
       onTouchCancel={cancelTouch}
-      className={`absolute ${width} rounded-xl overflow-hidden border border-white/10 pointer-events-auto transition-all duration-500 ease-out ${isHovered ? 'z-50 scale-105 shadow-[0_0_30px_rgba(255,255,255,0.1)]' :
-        isOtherHovered ? 'z-10 opacity-60' :
-          'z-20 opacity-100 shadow-2xl scale-100'
-        }`}
+      // Prevents mobile browser's native "Save Image" popup from canceling the long-press
+      onContextMenu={(e) => e.preventDefault()}
+      className={`absolute ${width} rounded-xl overflow-hidden border border-white/10 pointer-events-auto select-none [-webkit-touch-callout:none] transition-all duration-500 ease-out ${
+        isHovered
+          ? 'z-50 scale-105 shadow-[0_0_30px_rgba(255,255,255,0.1)]'
+          : isOtherHovered
+          ? 'z-10 opacity-60'
+          : 'z-20 opacity-100 shadow-2xl scale-100'
+      }`}
       style={{
         top, left, y: yScroll, x: xMouse, rotateX, rotateY, transformStyle: "preserve-3d",
         aspectRatio: getAspectRatioCSS(aspect)
@@ -121,6 +124,7 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
             src={currentImg.src}
             alt="Portfolio Item"
             fill
+            draggable={false}
             className={`object-cover transition-all duration-500 ease-out ${isHovered ? 'grayscale-0' : 'grayscale'}`}
             sizes="(max-width: 768px) 50vw, 30vw"
           />
@@ -143,7 +147,6 @@ function FloatingCard({ imageGroup, scrollYProgress, smoothMouseX, smoothMouseY,
   );
 }
 
-// THE MAIN GALLERY COMPONENT
 export default function FloatingGallery() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [windowHeight, setWindowHeight] = useState(0);
@@ -212,9 +215,12 @@ export default function FloatingGallery() {
     setSlideDirection(0);
   }, []);
 
-  const closeExpanded = () => setExpandedGroup(null);
+  const closeExpanded = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) e.stopPropagation();
+    setExpandedGroup(null);
+  }, []);
 
-  const nextSlide = useCallback((e?: React.MouseEvent) => {
+  const nextSlide = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     if (e) e.stopPropagation();
     if (expandedGroup) {
       setSlideDirection(1);
@@ -222,7 +228,7 @@ export default function FloatingGallery() {
     }
   }, [expandedGroup]);
 
-  const prevSlide = useCallback((e?: React.MouseEvent) => {
+  const prevSlide = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     if (e) e.stopPropagation();
     if (expandedGroup) {
       setSlideDirection(-1);
@@ -230,7 +236,6 @@ export default function FloatingGallery() {
     }
   }, [expandedGroup]);
 
-  // SWIPE HANDLER FOR MOBILE NATIVE FEEL
   const handleDragEnd = (event: any, info: any) => {
     const swipeThreshold = 50;
     if (info.offset.x < -swipeThreshold) {
@@ -240,7 +245,6 @@ export default function FloatingGallery() {
     }
   };
 
-  // Lock body scroll and listen for keyboard events
   useEffect(() => {
     if (expandedGroup) {
       document.body.style.overflow = "hidden";
@@ -257,7 +261,7 @@ export default function FloatingGallery() {
     } else {
       document.body.style.overflow = "unset";
     }
-  }, [expandedGroup, nextSlide, prevSlide]);
+  }, [expandedGroup, nextSlide, prevSlide, closeExpanded]);
 
   return (
     <section ref={containerRef} className="relative w-full h-[120vh] md:h-[150vh] bg-[#050505] overflow-hidden flex items-center justify-center">
@@ -305,12 +309,16 @@ export default function FloatingGallery() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
             onClick={closeExpanded}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-8 touch-none"
+            // FIX 1: Raised z-index from z-[100] to z-[10000000] so it sits ABOVE the z-[999999] Navbar on mobile
+            className="fixed inset-0 z-[10000000] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-8 touch-none"
           >
-            {/* CLOSE BUTTON */}
+            {/* CLOSE BUTTON - Added onTouchEnd + larger hit target so mobile taps never miss */}
             <button
+              type="button"
               onClick={closeExpanded}
-              className="absolute top-4 right-4 md:top-10 md:right-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all z-50 backdrop-blur-md cursor-pointer"
+              onTouchEnd={closeExpanded}
+              aria-label="Close expanded image"
+              className="absolute top-6 right-6 md:top-10 md:right-10 w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white flex items-center justify-center transition-all z-[60] backdrop-blur-md cursor-pointer pointer-events-auto"
             >
               ✕
             </button>
@@ -318,15 +326,18 @@ export default function FloatingGallery() {
             {/* PREV ARROW */}
             {expandedGroup.length > 1 && (
               <button
+                type="button"
                 onClick={prevSlide}
-                className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all z-50 backdrop-blur-md cursor-pointer"
+                onTouchEnd={prevSlide}
+                aria-label="Previous image"
+                className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white flex items-center justify-center transition-all z-[60] backdrop-blur-md cursor-pointer pointer-events-auto"
               >
                 ←
               </button>
             )}
 
             {/* SWIPEABLE IMAGE CONTAINER */}
-            <div className="relative w-full max-w-5xl h-[75vh] md:h-[85vh] flex items-center justify-center overflow-hidden">
+            <div className="relative w-full max-w-5xl h-[75vh] md:h-[85vh] flex items-center justify-center overflow-hidden pointer-events-none">
               <AnimatePresence mode="popLayout" custom={slideDirection}>
                 <motion.img
                   key={expandedIndex}
@@ -343,7 +354,7 @@ export default function FloatingGallery() {
                   dragElastic={0.2}
                   onDragEnd={handleDragEnd}
                   onClick={(e) => e.stopPropagation()} 
-                  className="absolute w-auto h-auto max-w-full max-h-full object-contain rounded-xl cursor-grab active:cursor-grabbing"
+                  className="absolute w-auto h-auto max-w-full max-h-full object-contain rounded-xl cursor-grab active:cursor-grabbing pointer-events-auto"
                 />
               </AnimatePresence>
             </div>
@@ -351,8 +362,11 @@ export default function FloatingGallery() {
             {/* NEXT ARROW */}
             {expandedGroup.length > 1 && (
               <button
+                type="button"
                 onClick={nextSlide}
-                className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all z-50 backdrop-blur-md cursor-pointer"
+                onTouchEnd={nextSlide}
+                aria-label="Next image"
+                className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white flex items-center justify-center transition-all z-[60] backdrop-blur-md cursor-pointer pointer-events-auto"
               >
                 →
               </button>
@@ -360,11 +374,13 @@ export default function FloatingGallery() {
 
             {/* DOT INDICATORS (BOTTOM) */}
             {expandedGroup.length > 1 && (
-              <div className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex gap-2.5 z-50 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+              <div className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex gap-2.5 z-[60] bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-auto">
                 {expandedGroup.map((_: any, idx: number) => (
                   <button
+                    type="button"
                     key={idx}
                     onClick={(e) => { e.stopPropagation(); setSlideDirection(idx > expandedIndex ? 1 : -1); setExpandedIndex(idx); }}
+                    onTouchEnd={(e) => { e.stopPropagation(); setSlideDirection(idx > expandedIndex ? 1 : -1); setExpandedIndex(idx); }}
                     className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                       idx === expandedIndex ? "w-6 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" : "w-2 bg-white/30 hover:bg-white/60"
                     }`}

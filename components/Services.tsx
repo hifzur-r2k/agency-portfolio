@@ -40,7 +40,6 @@ export default function Services() {
 
   return (
     <section 
-      id="services" 
       className="min-h-screen w-full bg-[#050505] text-[#FAFAFA] py-24 px-4 md:px-8 flex flex-col justify-center border-t border-white/10"
     >
       <div className="max-w-7xl w-full mx-auto mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -89,9 +88,14 @@ export default function Services() {
                 }`} 
               />
 
-              {/* Panel Content */}
-              <div className="relative z-10 w-full h-full p-6 md:p-8 flex flex-col justify-between pointer-events-none">
-                
+              {/* Panel Content: Uses horizontal row on mobile ONLY when collapsed into a thin strip so number and title never overlap */}
+              <div
+                className={`relative z-10 w-full h-full flex justify-between pointer-events-none ${
+                  isCollapsedStrip
+                    ? "px-5 py-3 md:p-8 flex-row items-center md:flex-col md:items-stretch"
+                    : "p-6 md:p-8 flex-col"
+                }`}
+              >
                 {/* Top Row: Number & Subtle Prompt */}
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-lg md:text-xl font-bold text-white/80">
@@ -165,7 +169,7 @@ export default function Services() {
                   {/* Mobile Collapsed Fallback */}
                   {isCollapsedStrip && (
                     <div className="md:hidden">
-                      <h3 className="text-lg font-bold uppercase tracking-tighter text-white/60">
+                      <h3 className="text-base sm:text-lg font-bold uppercase tracking-tighter text-white/60">
                         {service.title}
                       </h3>
                     </div>

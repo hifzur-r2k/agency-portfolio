@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { MeshDistortMaterial, Sphere, Float } from "@react-three/drei";
 import { useRef, useState } from "react";
 
@@ -8,6 +8,12 @@ import { useRef, useState } from "react";
 function LiquidShape() {
   const meshRef = useRef<any>(null);
   const [hovered, setHover] = useState(false);
+  const { viewport } = useThree();
+
+  // Dynamically scale down on narrow portrait phones/foldables so the sphere never clips off-screen,
+  // while keeping the exact 1.0 base scale on tablets, laptops, and desktops.
+  const responsiveBaseScale = Math.min(1, viewport.width / 3.8);
+  const finalScale = hovered ? responsiveBaseScale * 1.4 : responsiveBaseScale;
 
   // This rotates our 3D object slightly every single frame
   useFrame((state, delta) => {
@@ -23,19 +29,21 @@ function LiquidShape() {
       <Sphere
         ref={meshRef}
         args={[1.5, 96, 96]}
-        // When the user hovers it, it scales up beautifully!
-        scale={hovered ? 1.4 : 1}
-        onPointerOver={() => setHover(true)}
+        scale={finalScale}
+        // Only trigger hover expansion on real mouse pointers (prevents getting stuck on mobile taps)
+        onPointerOver={(e) => {
+          if (e.pointerType === "mouse") setHover(true);
+        }}
         onPointerOut={() => setHover(false)}
       >
         {/* This material is the secret to the liquid distortion */}
         <MeshDistortMaterial
           color={hovered ? "#ffffff" : "#555555"}
           attach="material"
-          distort={0.5} // How chaotic the liquid is
-          speed={2} // How fast it boils/morphs
+          distort={0.5}
+          speed={2}
           roughness={0.2}
-          wireframe={true} // Makes it look like a futuristic tech grid!
+          wireframe={true}
         />
       </Sphere>
     </Float>
@@ -45,7 +53,7 @@ function LiquidShape() {
 // This wraps our shape in the 3D Canvas environment
 export default function Hero3D() {
   return (
-    <div className="absolute inset-0 w-full h-full z-0 opacity-40">
+    <div className="absolute inset-0 w-full h-full z-0 opacity-40 pointer-events-none sm:pointer-events-auto">
       <Canvas
         camera={{ position: [0, 0, 4] }}
         // 1. CAP THE PIXEL RATIO: Stops high-res screens from frying the GPU
