@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -61,7 +61,15 @@ const FALLBACK_PROJECTS: Project[] = [
   },
 ];
 
-function ProjectCard({ project, index, onSelect }: { project: Project; index: number; onSelect: (p: Project) => void; }) {
+function ProjectCard({
+  project,
+  index,
+  onSelect,
+}: {
+  project: Project;
+  index: number;
+  onSelect: (p: Project) => void;
+}) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -105,11 +113,12 @@ function ProjectCard({ project, index, onSelect }: { project: Project; index: nu
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 opacity-60 group-hover:opacity-80 transition-opacity z-20 pointer-events-none" />
 
-        <div className="absolute top-4 left-4 z-30 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono uppercase tracking-widest text-white opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        {/* Visible on mobile/tablet by default, hover-animated on desktop */}
+        <div className="absolute top-4 left-4 z-30 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono uppercase tracking-widest text-white opacity-100 translate-y-0 lg:opacity-0 lg:-translate-y-2 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-300">
           {project.impact}
         </div>
 
-        <div className="absolute top-4 right-4 z-30 px-3 py-1.5 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <div className="absolute top-4 right-4 z-30 px-3 py-1.5 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest opacity-100 translate-y-0 lg:opacity-0 lg:-translate-y-2 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-300">
           Explore Case ↗
         </div>
 
@@ -148,8 +157,12 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  
-  // We instantly use the server data instead of fetching it!
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  // Refs for smooth programmatic image scrolling inside the modal
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   const [dbProjects] = useState<Project[]>(
     initialProjects && initialProjects.length > 0 ? initialProjects : FALLBACK_PROJECTS
   );
@@ -161,21 +174,59 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
     }
   }, [searchParams]);
 
+  // Jump to a specific image inside the modal
+  const scrollToImage = (idx: number) => {
+    if (!selectedProject?.images) return;
+    const bounded = Math.max(0, Math.min(idx, selectedProject.images.length - 1));
+    setActiveImageIndex(bounded);
+    imageRefs.current[bounded]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+
+  // Track which image is currently in view as the user scrolls with mouse wheel
+  const handleGalleryScroll = () => {
+    const container = galleryScrollRef.current;
+    if (!container || !selectedProject?.images) return;
+    const scrollPos = container.scrollTop + container.clientHeight * 0.35;
+
+    for (let i = 0; i < selectedProject.images.length; i++) {
+      const el = imageRefs.current[i];
+      if (el && el.offsetTop <= scrollPos && el.offsetTop + el.offsetHeight > scrollPos) {
+        setActiveImageIndex(i);
+        break;
+      }
+    }
+  };
+
+  // Lock BOTH html and body scroll + add keyboard navigation when modal is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSelectedProject(null);
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        scrollToImage(activeImageIndex + 1);
+      }
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        scrollToImage(activeImageIndex - 1);
+      }
     };
+
     if (selectedProject) {
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
     } else {
-      document.body.style.overflow = "unset";
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      setActiveImageIndex(0);
     }
+
     return () => {
-      document.body.style.overflow = "unset";
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedProject]);
+  }, [selectedProject, activeImageIndex]);
 
   const filteredProjects =
     activeCategory === "All"
@@ -187,8 +238,30 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       ? dbProjects.length
       : dbProjects.filter((p) => p.category === cat).length;
 
+  const hasValidLiveUrl =
+    selectedProject?.liveUrl &&
+    selectedProject.liveUrl.trim() !== "" &&
+    selectedProject.liveUrl.trim() !== "#";
+
   return (
     <main className="min-h-screen bg-[#050505] text-[#FAFAFA] pt-32 pb-24 px-6 md:px-12 relative z-10">
+      {/* Sleek Dark Custom Scrollbar for the Modal */}
+      <style>{`
+        .modal-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+          background: #050505;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 9999px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.4);
+        }
+      `}</style>
+
       <div className="max-w-7xl mx-auto">
         <Link
           href="/"
@@ -242,7 +315,10 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                 key={project.id}
                 project={project}
                 index={i}
-                onSelect={setSelectedProject}
+                onSelect={(p) => {
+                  setActiveImageIndex(0);
+                  setSelectedProject(p);
+                }}
               />
             ))}
           </AnimatePresence>
@@ -266,6 +342,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         </div>
       </div>
 
+      {/* CASE STUDY MODAL */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -273,7 +350,12 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedProject(null)}
-            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 md:p-10"
+            // FIX 1: z-[10000000] sits above the z-[999999] Navbar.
+            // FIX 2: data-lenis-prevent + onWheel stopPropagation stops SmoothScroll from scrolling the background!
+            data-lenis-prevent="true"
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[10000000] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6 md:p-10"
           >
             <motion.div
               initial={{ y: 60, opacity: 0 }}
@@ -281,37 +363,97 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
               exit={{ y: 40, opacity: 0 }}
               transition={{ type: "spring", damping: 26, stiffness: 220 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#0a0a0a] border border-white/15 w-full max-w-6xl rounded-2xl overflow-hidden max-h-[90vh] flex flex-col md:flex-row shadow-2xl"
+              className="relative bg-[#0a0a0a] border border-white/15 w-full max-w-6xl rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col md:flex-row shadow-2xl"
             >
-              <div className="w-full md:w-3/5 overflow-y-auto max-h-[50vh] md:max-h-[90vh] p-4 md:p-6 space-y-4 bg-[#050505] border-b md:border-b-0 md:border-r border-white/10">
-                {selectedProject.images?.map((imgUrl, idx) => (
-                  <div
-                    key={idx}
-                    className="relative rounded-xl overflow-hidden border border-white/10 bg-[#0a0a0a]"
-                  >
-                    <img
-                      src={imgUrl}
-                      alt={`${selectedProject.title} visual ${idx + 1}`}
-                      loading="lazy"
-                      className="w-full h-auto object-cover"
-                    />
-                    <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded bg-black/70 backdrop-blur-sm text-[10px] font-mono text-gray-300 border border-white/10">
-                      0{idx + 1} / 0{selectedProject.images.length}
-                    </span>
+              {/* TOP-RIGHT CLOSE BUTTON (Always pinned to top-right on both mobile and desktop) */}
+              <button
+                type="button"
+                onClick={() => setSelectedProject(null)}
+                className="absolute top-4 right-4 md:top-6 md:right-6 z-50 w-10 h-10 rounded-full bg-black/70 md:bg-white/5 hover:bg-white/20 border border-white/15 flex items-center justify-center text-gray-300 hover:text-white transition-colors cursor-pointer backdrop-blur-md"
+              >
+                ✕
+              </button>
+
+              {/* LEFT COLUMN: Scrollable Image Feed + Floating Quick-Jump Controls */}
+              <div className="relative w-full md:w-3/5 flex flex-col bg-[#050505] border-b md:border-b-0 md:border-r border-white/10 max-h-[52dvh] md:max-h-[90dvh]">
+                <div
+                  ref={galleryScrollRef}
+                  onScroll={handleGalleryScroll}
+                  data-lenis-prevent="true"
+                  className="modal-scroll w-full h-full overflow-y-auto overscroll-contain p-4 md:p-6 space-y-4 scroll-smooth"
+                >
+                  {selectedProject.images?.map((imgUrl, idx) => (
+                    <div
+                      key={idx}
+                      ref={(el) => {
+                        imageRefs.current[idx] = el;
+                      }}
+                      className="relative rounded-xl overflow-hidden border border-white/10 bg-[#0a0a0a]"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`${selectedProject.title} visual ${idx + 1}`}
+                        loading="lazy"
+                        className="w-full h-auto object-cover"
+                      />
+                      <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded bg-black/75 backdrop-blur-sm text-[10px] font-mono text-gray-200 border border-white/10">
+                        {String(idx + 1).padStart(2, "0")} /{" "}
+                        {String(selectedProject.images.length).padStart(2, "0")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* FLOATING GALLERY NAVIGATION BAR (Click to jump or step through images) */}
+                {selectedProject.images && selectedProject.images.length > 1 && (
+                  <div className="sticky bottom-3 left-0 right-0 mx-auto w-max z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/85 backdrop-blur-xl border border-white/15 shadow-2xl mb-2">
+                    <button
+                      type="button"
+                      onClick={() => scrollToImage(activeImageIndex - 1)}
+                      disabled={activeImageIndex === 0}
+                      className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/20 disabled:opacity-30 text-white text-xs flex items-center justify-center transition-colors cursor-pointer"
+                      title="Previous Image"
+                    >
+                      ↑
+                    </button>
+
+                    <div className="flex items-center gap-1 px-1">
+                      {selectedProject.images.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => scrollToImage(idx)}
+                          className={`px-2 py-1 rounded-full font-mono text-[10px] transition-all cursor-pointer ${
+                            activeImageIndex === idx
+                              ? "bg-white text-black font-bold"
+                              : "text-gray-400 hover:text-white"
+                          }`}
+                        >
+                          0{idx + 1}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => scrollToImage(activeImageIndex + 1)}
+                      disabled={activeImageIndex === selectedProject.images.length - 1}
+                      className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/20 disabled:opacity-30 text-white text-xs flex items-center justify-center transition-colors cursor-pointer"
+                      title="Next Image"
+                    >
+                      ↓
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
 
-              <div className="w-full md:w-2/5 p-6 md:p-10 flex flex-col justify-between relative overflow-y-auto max-h-[40vh] md:max-h-[90vh]">
-                <button
-                  onClick={() => setSelectedProject(null)}
-                  className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-
+              {/* RIGHT COLUMN: Project Details */}
+              <div
+                data-lenis-prevent="true"
+                className="modal-scroll w-full md:w-2/5 p-6 md:p-10 flex flex-col justify-between relative overflow-y-auto overscroll-contain max-h-[38dvh] md:max-h-[90dvh]"
+              >
                 <div>
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex flex-wrap items-center gap-3 mb-4 pr-10">
                     <span className="text-gray-400 uppercase tracking-widest text-[10px] font-bold">
                       {selectedProject.category}
                     </span>
@@ -332,7 +474,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                   {selectedProject.deliverables && selectedProject.deliverables.length > 0 && (
                     <div className="mb-8">
                       <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-3">
-                        Scope & Deliverables
+                        Scope &amp; Deliverables
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {selectedProject.deliverables.map((item) => (
@@ -349,7 +491,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-white/10">
-                  {selectedProject.liveUrl && (
+                  {hasValidLiveUrl && (
                     <a
                       href={selectedProject.liveUrl}
                       target="_blank"
@@ -360,6 +502,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                     </a>
                   )}
                   <button
+                    type="button"
                     onClick={() => setSelectedProject(null)}
                     className="px-6 py-3.5 rounded-full border border-white/15 text-gray-300 hover:text-white hover:border-white/40 font-bold uppercase tracking-widest text-xs transition-colors cursor-pointer"
                   >
