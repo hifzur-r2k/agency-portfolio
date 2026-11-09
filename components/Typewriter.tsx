@@ -22,28 +22,27 @@ export default function Typewriter() {
 
   return (
     <div 
-      // FIX: Hidden on tablet widths (md:hidden lg:flex) so it never collides with the navigation pill, 
-      // but visible on mobile and large desktop screens!
-      className="absolute top-24 left-6 hidden lg:flex md:top-10 md:left-12 z-50 items-center gap-4 pointer-events-none"
+      // Repositioned: Clears the navbar on mobile/tablet (top-24/28), tucks into the corner on desktop
+      className="absolute top-[90px] left-6 md:top-[110px] md:left-8 lg:top-10 lg:left-12 z-40 flex items-center gap-3 pointer-events-none"
     >
-      {/* Minimalist architectural tracking line */}
+      {/* Sleek, minimal architectural line. No dots. */}
       <motion.div 
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="w-8 md:w-12 h-[1px] bg-white/40 origin-left" 
+        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+        className="w-4 sm:w-8 h-[1px] bg-white/30 origin-left" 
       />
       
-      {/* The Masked Ticker Container */}
-      <div className="relative h-6 md:h-8 overflow-hidden flex items-center">
+      {/* Raw, elegant typography */}
+      <div className="relative h-5 overflow-hidden flex items-center">
         <AnimatePresence mode="popLayout">
           <motion.div
             key={index}
-            initial={{ y: 20, opacity: 0, filter: "blur(8px)" }}
-            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-            exit={{ y: -20, opacity: 0, filter: "blur(8px)" }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
-            className="text-white/80 font-mono text-[10px] md:text-xs uppercase tracking-[0.25em] font-medium whitespace-nowrap"
+            initial={{ y: 15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -15, opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} 
+            className="text-gray-400 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.25em] font-medium whitespace-nowrap"
           >
             {services[index]}
           </motion.div>
