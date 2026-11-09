@@ -710,7 +710,7 @@ export default function Home() {
 
               {/* Swap 910000000000 with your real WhatsApp number */}
               <a
-                href="https://wa.me/916388776067?text=Hey%20Zero%20Gravity%20team!%20I'd%20like%20to%20discuss%20a%20project."
+                href="https://wa.me/910000000000?text=Hey%20Zero%20Gravity%20team!%20I'd%20like%20to%20discuss%20a%20project."
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => posthog?.capture("Opened WhatsApp ChatLink")}
